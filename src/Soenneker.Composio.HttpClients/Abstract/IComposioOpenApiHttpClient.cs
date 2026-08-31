@@ -6,14 +6,14 @@ using System.Threading;
 namespace Soenneker.Composio.HttpClients.Abstract;
 
 /// <summary>
-/// A .NET thread-safe singleton HttpClient for 
+/// Provides a configured <see cref="HttpClient"/> for the Composio API.
 /// </summary>
 public interface IComposioOpenApiHttpClient: IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// Gets the value.
+    /// Gets the cached client owned by this provider.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A task containing the result of the operation.</returns>
+    /// <returns>The configured Composio client.</returns>
     ValueTask<HttpClient> Get(CancellationToken cancellationToken = default);
 }

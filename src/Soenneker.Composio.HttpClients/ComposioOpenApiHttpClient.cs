@@ -16,6 +16,7 @@ public sealed class ComposioOpenApiHttpClient : IComposioOpenApiHttpClient
 {
     private readonly IHttpClientCache _httpClientCache;
     private readonly IConfiguration _config;
+    private readonly string _cacheKey = $"{nameof(ComposioOpenApiHttpClient)}:{Guid.NewGuid():N}";
 
     private const string _prodBaseUrl = "https://backend.composio.dev";
 
@@ -27,11 +28,11 @@ public sealed class ComposioOpenApiHttpClient : IComposioOpenApiHttpClient
 
     public ValueTask<HttpClient> Get(CancellationToken cancellationToken = default)
     {
-        return _httpClientCache.Get(nameof(ComposioOpenApiHttpClient), (config: _config, baseUrl: _config["Composio:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
+        return _httpClientCache.Get(_cacheKey, (config: _config, baseUrl: _config["Composio:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
             var apiKey = state.config.GetValueStrict<string>("Composio:ApiKey");
-            string authHeaderName = state.config["Composio:AuthHeaderName"] ?? "Authorization";
-            string authHeaderValueTemplate = state.config["Composio:AuthHeaderValueTemplate"] ?? "Bearer {token}";
+            string authHeaderName = state.config["Composio:AuthHeaderName"] ?? "x-api-key";
+            string authHeaderValueTemplate = state.config["Composio:AuthHeaderValueTemplate"] ?? "{token}";
             string authHeaderValue = authHeaderValueTemplate.Replace("{token}", apiKey, StringComparison.Ordinal);
 
             return new HttpClientOptions
@@ -45,20 +46,13 @@ public sealed class ComposioOpenApiHttpClient : IComposioOpenApiHttpClient
         }, cancellationToken);
     }
 
-    /// <summary>
-    /// Releases resources used by the current instance.
-    /// </summary>
     public void Dispose()
     {
-        _httpClientCache.RemoveSync(nameof(ComposioOpenApiHttpClient));
+        _httpClientCache.RemoveSync(_cacheKey);
     }
 
-    /// <summary>
-    /// Asynchronously releases resources used by the current instance.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation.</returns>
     public ValueTask DisposeAsync()
     {
-        return _httpClientCache.Remove(nameof(ComposioOpenApiHttpClient));
+        return _httpClientCache.Remove(_cacheKey);
     }
 }
