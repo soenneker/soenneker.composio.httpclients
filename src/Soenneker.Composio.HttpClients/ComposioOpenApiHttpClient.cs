@@ -30,7 +30,7 @@ public sealed class ComposioOpenApiHttpClient : IComposioOpenApiHttpClient
     {
         return _httpClientCache.Get(_cacheKey, (config: _config, baseUrl: _config["Composio:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
-            var apiKey = state.config.GetValueStrict<string>("Composio:ApiKey");
+            var apiKey = state.config.GetStringStrict("Composio:ApiKey");
             string authHeaderName = state.config["Composio:AuthHeaderName"] ?? "x-api-key";
             string authHeaderValueTemplate = state.config["Composio:AuthHeaderValueTemplate"] ?? "{token}";
             string authHeaderValue = authHeaderValueTemplate.Replace("{token}", apiKey, StringComparison.Ordinal);
